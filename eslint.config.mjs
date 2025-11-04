@@ -1,6 +1,4 @@
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { FlatCompat } from '@eslint/eslintrc';
 
 import eslintParserTypescript from '@typescript-eslint/parser';
 import eslintPluginTypescript from '@typescript-eslint/eslint-plugin';
@@ -8,34 +6,44 @@ import eslintPluginImport from 'eslint-plugin-import';
 import eslintPluginPrettier from 'eslint-plugin-prettier';
 import eslintPluginNext from '@next/eslint-plugin-next';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['components/ui/'],
+    ignores: [
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/out/**',
+      '**/build/**',
+      '**/dist/**',
+      '**/coverage/**',
+      '**/*.config.js',
+      '**/*.config.mjs',
+      '**/*.json',
+      '**/components/ui/**',
+    ],
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     languageOptions: {
       parser: eslintParserTypescript,
       parserOptions: {
-        project: './tsconfig.json',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
     plugins: {
-      prettier: eslintPluginPrettier,
-      import: eslintPluginImport,
       '@typescript-eslint': eslintPluginTypescript,
-      next: eslintPluginNext,
+      import: eslintPluginImport,
+      prettier: eslintPluginPrettier,
+      '@next/next': eslintPluginNext,
     },
     rules: {
+      // Prettier
       'prettier/prettier': 'error',
+
+      // Import
       'import/order': [
         'error',
         {
@@ -61,6 +69,8 @@ const eslintConfig = [
         },
       ],
       'import/no-unresolved': 'off',
+
+      // TypeScript
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -71,20 +81,29 @@ const eslintConfig = [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/consistent-type-imports': 'error',
+
+      // Next.js
+      '@next/next/no-html-link-for-pages': 'error',
+      '@next/next/no-img-element': 'warn',
     },
     settings: {
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
+      react: {
+        version: 'detect',
       },
     },
   },
   {
-    files: ['**/*.json'],
-    rules: {
-      'no-empty': 'off',
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parser: eslintParserTypescript,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.json',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
     },
   },
 ];
